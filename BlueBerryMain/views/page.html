@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel = "stylesheet" href = "../styles/pageStyle.css" type = "text/css" />
+    <script type="text/javascript" src = "../User.js"></script>
+    <script type="text/javascript" src = "../WebSocketClient.js"></script>
+    <script type="text/javascript" src = "../BBmodel.js"></script>
+    <script type="text/javascript" src = "../BBview.js"></script>
+    <script type="text/javascript" src = "../BBcontroller.js"></script>
+    <script type="text/javascript" src = "../blueberry.js"></script>
+    <title>BlueBerry</title>
+</head>
+<body onload = "app.JoinMainPage()">
+<footer>
+    <ui class = "menu">
+        <li id = "t1" onclick="app.handleCalendars()"><img class = "btnIcon"  alt="*" src="../icons/calendaricon.svg"><a class = "tab" id = "calendar" >Расписание</a></li>
+        <li id = "t2" onclick="app.handleNews()"><img class = "btnIcon" alt="*" src="../icons/newsicon.svg"><a class = "tab" id = "news" ></i>Новости</a></li>
+        <li id = "t3" onclick="app.handleChats()"><img class = "btnIcon" alt="*" src="../icons/chaticon.svg"><a class = "tab" id = "chat" ></i>Сообщения</a></li>
+        <li id = "t4" onclick="app.handleMap()"><img class = "btnIcon" alt="*" src="../icons/mapicon.svg"><a class = "tab" id = "map" ></i>Карта</a></li>
+        <li id = "t5" onclick="app.handleProfile()"><img class = "btnIcon" alt="*" src="../icons/profileicon.svg"><a class = "tab" id = "profile" >Профиль</a></li>
+    </ui>
+</footer>
+
+<div class = "wrapper">
+
+    <div class = "content" id = "calendarCont" style="display: none">
+        <header>
+            Расписание
+        </header>
+        <div id = "calendar-list">
+
+        </div>
+
+    </div>
+    <div class = "content" id = "newsCont" style="display: none">
+        <header>
+            Новости
+        </header>
+        <div></div>
+    </div>
+    <div class = "content" id = "chatCont" style="display: none">
+        <header>
+            Чат
+        </header>
+        <div></div>
+    </div>
+    <div class = "content" id = "mapCont" style="display: none">
+        <header>
+            Карта
+        </header>
+        <div id = "YanMap">
+            <script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A216b5ce63960d3cb781384acee9759f2cf32a5770f82fcb9af80ec2e2ec178db&amp;width=100%25&amp;height=100%&amp;lang=ru_RU&amp;scroll=true&amp;apikey = <235bd7d6-6ed4-4ada-b8ac-2c992c7776ba>"></script>
+        </div>
+    </div>
+    <div class = "content" id = "profileCont" style="display: none">
+        <header>
+            Профиль
+        </header>
+        <div></div>
+    </div>
+    
+</div>
+
+
+</body>
+</html>

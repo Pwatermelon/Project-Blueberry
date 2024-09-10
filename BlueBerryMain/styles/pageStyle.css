@@ -1,0 +1,206 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+html,
+body {
+    height: 100%;
+}
+.content{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: space-between;
+}
+#calendar-list{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.calendarPop:hover{
+    background-color: #0D6CBD;
+}
+.calendarPop{
+    cursor: pointer;
+    user-select: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-color: white;
+    border-style: solid;
+    border-radius: 100%;
+}
+.calendarPop-show{
+    cursor: pointer;
+    user-select: none;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-color: white;
+    border-style: solid;
+    border-radius: 100%;
+    background-color: #0D6CBD;
+}
+header{
+    user-select: none;
+    color: #0D6CBD;
+    line-height: 40px;
+    height: 5%;
+    width: 100%;
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    background-color: #F1F5F9;
+}
+#YanMap{
+    width: 100%;
+    height: 50%;
+}
+@media screen and (max-width: 600px) {
+    .wrapper {
+        width: 100%;
+        height: 100%;
+    }
+    .content {
+        height: 95%;
+        background-color: white;
+    }
+    header{
+        width: 100%;
+    }
+    footer {
+        position: absolute;
+        top: 95%;
+        height: 5%;
+        width: 100%;
+        background-color: #004E9E;
+        border-radius: 20px 20px 0 0;
+    }
+    .menu{
+        user-select: none;
+        height: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        list-style-type: none;
+        text-align: center;
+    }
+    
+    li:hover{
+        background-image: linear-gradient(#fff,#004E9E,#004E9E);
+    }
+    li:hover .tab{
+        color: #fff;
+    }
+    li{    
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0;
+        width: 20%;
+        height: 100%;
+        border-radius: 20px 20px 0 0 ;
+        background:#004E9E ;
+        text-align:center;/*выравнивание текста по центру*/
+    }
+    .tab ::before{
+        perspective: 8%;
+        perspective-origin: 10%;
+        content: ' ';
+        position: absolute;
+        top:0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        
+    }
+    .tab{
+        color:white;
+        width: 100%;
+        font-weight: bold;
+        position: relative;
+        background-color: transparent;
+        text-align: center;
+        
+    }
+}
+.menu img{
+    width: 100%;
+    height: 50%;
+}
+@media screen and (min-width: 600px) {
+    .wrapper {
+        background-color: #F1F5F9;
+        width: 100%;
+        height: 100%;
+    }
+    .content {
+        position: relative;
+        top: 5%;
+        height: 95%;
+        background-color: white;
+    }
+    header{
+        width: 100%;
+    }
+    footer {
+        position: absolute;
+        height: 5%;
+        width: 100%;
+        background-color: #004E9E;
+        border-radius:  0 0 20px 20px;
+    }
+    .menu{
+        user-select: none;
+        height: 100%;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        list-style-type: none;
+        text-align: center;
+    }
+    
+    li:hover{
+        background-image: linear-gradient(#004E9E,#004E9E,#fff);
+    }
+    li:hover .tab{
+        color: #fff;
+    }
+    li{    
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0;
+        width: 20%;
+        height: 100%;
+        border-radius:  0 0 20px 20px;
+        background:#004E9E ;
+        text-align:center;/*выравнивание текста по центру*/
+    }
+    .tab ::before{
+
+        content: ' ';
+        position: absolute;
+        top:0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        
+    }
+    .tab{
+        color:white;
+        width: 100%;
+        height: 100%;
+        font-weight: bold;
+        position: relative;
+        background-color: transparent;
+        text-align: center;
+        
+    }
+}

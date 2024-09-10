@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel = "stylesheet" href = "../styles/authorizeStyle.css" type = "text/css" />
+    <script type="text/javascript" src = "../User.js"></script>
+    <script type="text/javascript" src = "../WebSocketClient.js"></script>
+    <script type="text/javascript" src = "../BBmodel.js"></script>
+    <script type="text/javascript" src = "../BBview.js"></script>
+    <script type="text/javascript" src = "../BBcontroller.js"></script>
+    <script type="text/javascript" src = "../blueberry.js"></script>
+    <title>Авторизация</title>
+</head>
+<body >
+    <header>
+
+    </header>
+    <div class="page">
+        <form class="registerForm" onsubmit="preventDefault()">
+            <label class="element" for ="login">Логин</label><input type="text" id = "login" placeholder="Логин">
+            <label class="element" for="password">Пароль</label><input type="password" id = "password" placeholder="Пароль">
+            <button class="element" type="button" onclick="app.Login()" >Войти</button>
+            <button class="element" type="button" onclick="app.Register()">Зарегистрироваться</button>
+        </form>
+    </div>
+    <footer>
+
+    </footer>
+</body>
+</html>
