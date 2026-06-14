@@ -1,0 +1,29 @@
+{
+  "slug": "my-university",
+  "name": "Название университета",
+  "shortName": "НУ",
+  "branding": {
+    "primaryColor": "#2563eb",
+    "accentColor": "#7c3aed"
+  },
+  "schedule": {
+    "adapter": "json-import",
+    "groupsCatalog": "data/groups.csv",
+    "legacyTxtPath": "data/calendars"
+  },
+  "map": {
+    "defaultCenter": { "lat": 55.75, "lng": 37.62, "zoom": 14 },
+    "buildingsFile": "data/buildings.json",
+    "provider": "osm"
+  },
+  "features": {
+    "schedule": true,
+    "homework": true,
+    "chats": true,
+    "federatedChats": true,
+    "map": true,
+    "news": true,
+    "broadcasts": false
+  },
+  "welcomeBanner": "Добро пожаловать в «Цифровой ВУЗ»."
+}

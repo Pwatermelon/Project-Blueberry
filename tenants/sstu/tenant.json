@@ -1,0 +1,31 @@
+{
+  "slug": "sstu",
+  "name": "Саратовский государственный технический университет",
+  "shortName": "СГТУ",
+  "branding": {
+    "primaryColor": "#4f46e5",
+    "accentColor": "#a855f7"
+  },
+  "schedule": {
+    "adapter": "sstu-rasp",
+    "legacyTxtPath": "data/calendars",
+    "groupsCatalog": "data/links.csv",
+    "defaultGroupExternalKey": "55",
+    "defaultGroupName": "м2-ИФСТ-11"
+  },
+  "map": {
+    "defaultCenter": { "lat": 51.533, "lng": 46.034, "zoom": 15 },
+    "buildingsFile": "data/buildings.json",
+    "provider": "osm"
+  },
+  "features": {
+    "schedule": true,
+    "homework": true,
+    "chats": true,
+    "federatedChats": true,
+    "map": true,
+    "news": true,
+    "broadcasts": true
+  },
+  "welcomeBanner": "Портал СГТУ «Цифровой ВУЗ»: расписание, задания, чаты, новости и карта корпусов."
+}

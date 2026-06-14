@@ -1,0 +1,18 @@
+{
+  "formatVersion": "1.0",
+  "organizationSlug": "my-university",
+  "studyGroup": "ИВТ-21",
+  "studyGroupExternalKey": "101",
+  "generatedAt": "2026-06-01T12:00:00+03:00",
+  "entries": [
+    {
+      "date": "2026-06-02",
+      "timeStart": "09:00",
+      "timeEnd": "10:30",
+      "subject": "Пример дисциплины",
+      "room": "ауд. 101",
+      "kind": "лекция",
+      "teacher": "Преподаватель П.П."
+    }
+  ]
+}

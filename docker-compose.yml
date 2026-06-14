@@ -1,0 +1,72 @@
+# Запуск всего стека одной командой:
+#   docker compose up --build
+# Сайт: http://localhost:3000
+# Парсер СГТУ: http://localhost:8081  (внутри сети compose: http://parser:8000)
+
+name: cifrovoy-vuz
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cvuz
+      POSTGRES_PASSWORD: cvuz
+      POSTGRES_DB: cvuz
+    ports:
+      - "5432:5432"
+    volumes:
+      - cvuz_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cvuz -d cvuz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  parser:
+    build:
+      context: ./services/sstu-parser
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8000"
+    environment:
+      REQUEST_TIMEOUT: "30"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://cvuz:cvuz@db:5432/cvuz
+      AUTH_SECRET: ${AUTH_SECRET:-dev-only-change-me-openssl-rand-base64-32-chars-min}
+      AUTH_TRUST_HOST: "true"
+      # URL, с которого открываешь сайт в браузере (важно для cookies авторизации)
+      AUTH_URL: http://localhost:3000
+      NEXTAUTH_URL: http://localhost:3000
+      PARSER_URL: http://parser:8000
+      DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-all}
+      TENANT_SLUG: ${TENANT_SLUG:-sstu}
+      ROOT_ADMIN_EMAIL: ${ROOT_ADMIN_EMAIL:-}
+      HUB_BASE_URL: ${HUB_BASE_URL:-http://localhost:3000}
+      HUB_SYNC_SECRET: ${HUB_SYNC_SECRET:-dev-hub-sync-secret-change-me}
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
+      ALLOW_DEV_LOGIN: ${ALLOW_DEV_LOGIN:-true}
+      # false — не запускать seed при каждом старте (после первого раза можно выключить)
+      SEED_ON_START: ${SEED_ON_START:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+      parser:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  cvuz_pg:

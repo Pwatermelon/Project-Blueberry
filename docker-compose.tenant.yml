@@ -1,0 +1,69 @@
+# Реплика вуза — локальные данные на сервере ВУЗа
+#
+#   docker compose -f docker-compose.tenant.yml up --build
+#   http://localhost:3001  (порт по умолчанию — не конфликтует с hub)
+#
+# Hub (если уже поднят): HUB_BASE_URL=http://host.docker.internal:3000
+
+name: cifrovoy-vuz-tenant
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cvuz
+      POSTGRES_PASSWORD: cvuz
+      POSTGRES_DB: cvuz_tenant
+    ports:
+      - "5434:5432"
+    volumes:
+      - cvuz_tenant_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cvuz -d cvuz_tenant"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  parser:
+    build:
+      context: ./services/sstu-parser
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgresql://cvuz:cvuz@db:5432/cvuz_tenant
+      AUTH_SECRET: ${AUTH_SECRET:-dev-tenant-change-me-min-32-chars!!}
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: ${AUTH_URL:-http://localhost:3001}
+      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3001}
+      DEPLOYMENT_MODE: tenant
+      TENANT_SLUG: ${TENANT_SLUG:-sstu}
+      ROOT_ADMIN_EMAIL: ${ROOT_ADMIN_EMAIL:-}
+      HUB_BASE_URL: ${HUB_BASE_URL:-http://host.docker.internal:3000}
+      HUB_SYNC_SECRET: ${HUB_SYNC_SECRET:-dev-hub-sync-secret-change-me}
+      PARSER_URL: http://parser:8000
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
+      ALLOW_DEV_LOGIN: ${ALLOW_DEV_LOGIN:-true}
+      SEED_ON_START: ${SEED_ON_START:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+      parser:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  cvuz_tenant_pg:

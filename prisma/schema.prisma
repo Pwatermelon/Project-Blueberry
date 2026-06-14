@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+  STAFF
+}
+
+enum ScheduleSource {
+  SSTU_RASP
+  LEGACY_TXT
+  JSON_IMPORT
+  MANUAL
+}
+
+model Organization {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
+  shortName      String?
+  logoUrl        String?
+  primaryColor   String         @default("#4f46e5")
+  accentColor    String         @default("#a855f7")
+  scheduleSource ScheduleSource @default(JSON_IMPORT)
+  /// @deprecated — используйте tenant pack (tenants/{slug}/tenant.json)
+  sstuGroupId    Int?
+  /// Slug пакета в каталоге tenants/
+  tenantPackSlug String?
+  siteUrl        String?
+  hubBaseUrl     String?
+  /// Единый JSON-конфиг темы и интеграций (одна схема для всех ВУЗов)
+  portalConfig   Json           @default("{}")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  memberships Membership[]
+  groups      StudyGroup[]
+  schedule    ScheduleEntry[]
+  news        NewsPost[]
+  rooms       ChatRoom[]
+  buildings   CampusBuilding[]
+  broadcasts  Broadcast[]
+  homework    Homework[]
+  emailBindings OrganizationEmailBinding[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  /// ID аккаунта Яндекс ID (OAuth)
+  yandexId     String?  @unique
+  name         String?
+  avatarUrl    String?
+  /// ID профиля на hub-сервере (межвузовские чаты)
+  hubProfileId String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships       Membership[]
+  messages          Message[]
+  homeworkAuthored  Homework[] @relation("HomeworkAuthor")
+  emailBindings     OrganizationEmailBinding[] @relation("BoundUser")
+}
+
+model Membership {
+  id             String  @id @default(cuid())
+  userId         String
+  organizationId String
+  role           Role    @default(STUDENT)
+  studyGroupId   String?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  studyGroup   StudyGroup?  @relation(fields: [studyGroupId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model StudyGroup {
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String
+  externalKey    String?
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships  Membership[]
+  schedule     ScheduleEntry[]
+  homework     Homework[]
+  emailBindings OrganizationEmailBinding[]
+
+  @@unique([organizationId, name])
+}
+
+/// Привязка пользователя к вузу по почте Яндекс ID (до первого входа — только email)
+model OrganizationEmailBinding {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  role           Role      @default(STUDENT)
+  studyGroupId   String?
+  note           String?
+  boundUserId    String?
+  boundAt        DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  studyGroup   StudyGroup?  @relation(fields: [studyGroupId], references: [id])
+  boundUser    User?        @relation("BoundUser", fields: [boundUserId], references: [id])
+
+  @@unique([organizationId, email])
+  @@index([email])
+  @@index([organizationId])
+}
+
+model ScheduleEntry {
+  id             String   @id @default(cuid())
+  organizationId String
+  studyGroupId   String
+  date           DateTime @db.Date
+  timeStart      String
+  timeEnd        String
+  room           String?
+  subject        String
+  kind           String?
+  teacher        String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  studyGroup   StudyGroup   @relation(fields: [studyGroupId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, date])
+  @@index([studyGroupId, date])
+}
+
+model Homework {
+  id             String    @id @default(cuid())
+  organizationId String
+  studyGroupId   String?
+  authorId       String
+  title          String
+  body           String    @db.Text
+  dueAt          DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  studyGroup   StudyGroup?  @relation(fields: [studyGroupId], references: [id])
+  author       User         @relation("HomeworkAuthor", fields: [authorId], references: [id])
+
+  @@index([organizationId])
+}
+
+model NewsPost {
+  id             String   @id @default(cuid())
+  organizationId String
+  title          String
+  body           String   @db.Text
+  publishedAt    DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, publishedAt])
+}
+
+model ChatRoom {
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String
+  /// local — внутри вуза; federated — зеркало канала hub (id канала в hubChannelId)
+  scope          String  @default("local")
+  hubChannelId   String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages     Message[]
+
+  @@index([organizationId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
+
+model CampusBuilding {
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String
+  address        String?
+  lat            Float
+  lng            Float
+  description    String?
+  /// [{ level, label, planImageUrl?, rooms: [{ code, name, lat?, lng? }] }]
+  floors         Json    @default("[]")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+// --- Hub (DEPLOYMENT_MODE=hub или all) ---
+
+/// Реестр развёрнутых реплик вузов на родительском hub (только мета + домен)
+model RegisteredTenant {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  shortName    String?
+  description  String?
+  logoUrl      String?
+  primaryColor String   @default("#4f46e5")
+  accentColor  String   @default("#a855f7")
+  /// Домен реплики вуза, например https://portal.sstu.ru
+  siteUrl      String
+  isPublished  Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+}
+
+model FederatedProfile {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  /// [{ orgSlug, orgName, role }]
+  tenants   Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages FederatedMessage[]
+}
+
+model FederatedChannel {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  messages FederatedMessage[]
+}
+
+model FederatedMessage {
+  id        String   @id @default(cuid())
+  channelId String
+  profileId String
+  body      String
+  /// { orgSlug, orgName }
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  channel FederatedChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  profile FederatedProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+}
+
+model Broadcast {
+  id             String    @id @default(cuid())
+  organizationId String
+  title          String
+  streamUrl      String
+  description    String?
+  startsAt       DateTime?
+  endsAt         DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}

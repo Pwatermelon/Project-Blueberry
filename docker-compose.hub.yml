@@ -1,0 +1,55 @@
+# Родительский hub — только общий слой (реестр вузов, чаты, Яндекс ID)
+#
+#   docker compose -f docker-compose.hub.yml up --build
+#   http://localhost:3000
+
+name: cifrovoy-vuz-hub
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cvuz
+      POSTGRES_PASSWORD: cvuz
+      POSTGRES_DB: cvuz_hub
+    ports:
+      - "5433:5432"
+    volumes:
+      - cvuz_hub_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cvuz -d cvuz_hub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://cvuz:cvuz@db:5432/cvuz_hub
+      AUTH_SECRET: ${AUTH_SECRET:-dev-hub-change-me-min-32-chars-long!!}
+      AUTH_TRUST_HOST: "true"
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      NEXTAUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      DEPLOYMENT_MODE: hub
+      HUB_ROOT_ADMIN_EMAIL: ${HUB_ROOT_ADMIN_EMAIL:-}
+      HUB_SYNC_SECRET: ${HUB_SYNC_SECRET:-dev-hub-sync-secret-change-me}
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
+      ALLOW_DEV_LOGIN: ${ALLOW_DEV_LOGIN:-true}
+      SEED_ON_START: ${SEED_ON_START:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  cvuz_hub_pg:
